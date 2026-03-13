@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../main.dart';
 import '../../core/database/app_database.dart';
+import '../../core/services/location_service.dart';
 
 class AddPriceScreen extends ConsumerStatefulWidget {
   final String barcode;
@@ -29,6 +30,7 @@ class _AddPriceScreenState extends ConsumerState<AddPriceScreen> {
   DateTime _selectedDate = DateTime.now();
   int? _resolvedProductId;
   bool _saving = false;
+  bool _locating = false;
 
   @override
   void initState() {
@@ -36,6 +38,44 @@ class _AddPriceScreenState extends ConsumerState<AddPriceScreen> {
     _resolvedProductId = widget.productId;
     if (widget.productName != null) {
       _productNameController.text = widget.productName!;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _autoSelectNearestStore());
+  }
+
+  Future<void> _autoSelectNearestStore() async {
+    final db = ref.read(databaseProvider);
+    final locationService = ref.read(locationServiceProvider);
+    final stores = await db.getAllStores();
+    if (stores.isEmpty) return;
+
+    // S'il n'y a qu'un seul magasin, le sélectionner directement
+    if (stores.length == 1) {
+      if (mounted) setState(() => _selectedStoreId = stores.first.id);
+      return;
+    }
+
+    // Vérifier si au moins un magasin a des coordonnées GPS
+    final hasGeoStores = stores.any((s) => s.latitude != null && s.longitude != null);
+    if (!hasGeoStores) return;
+
+    setState(() => _locating = true);
+    try {
+      final position = await locationService.getCurrentPosition();
+      final nearest = locationService.findNearestStore(stores, position);
+      if (nearest != null && mounted) {
+        setState(() => _selectedStoreId = nearest.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Magasin le plus proche : ${nearest.name}'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (_) {
+      // Permission refusée ou service désactivé : on laisse l'utilisateur choisir manuellement
+    } finally {
+      if (mounted) setState(() => _locating = false);
     }
   }
 
@@ -220,21 +260,45 @@ class _AddPriceScreenState extends ConsumerState<AddPriceScreen> {
                     onPressed: () => context.push('/stores'),
                   );
                 }
-                return DropdownButtonFormField<int>(
-                  initialValue: _selectedStoreId,
-                  decoration: const InputDecoration(
-                    labelText: 'Magasin',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.store_outlined),
-                  ),
-                  items: stores
-                      .map((s) => DropdownMenuItem(
-                            value: s.id,
-                            child: Text(s.name),
-                          ))
-                      .toList(),
-                  onChanged: (v) => setState(() => _selectedStoreId = v),
-                  validator: (v) => v == null ? 'Requis' : null,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      value: _selectedStoreId,
+                      decoration: InputDecoration(
+                        labelText: 'Magasin',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: _locating
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              )
+                            : const Icon(Icons.store_outlined),
+                      ),
+                      items: stores
+                          .map((s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name),
+                              ))
+                          .toList(),
+                      onChanged: (v) => setState(() => _selectedStoreId = v),
+                      validator: (v) => v == null ? 'Requis' : null,
+                    ),
+                    if (_locating)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6, left: 4),
+                        child: Text(
+                          'Détection du magasin le plus proche...',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ),
+                  ],
                 );
               },
             ),

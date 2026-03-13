@@ -20,6 +20,8 @@ class Stores extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   TextColumn get location => text().nullable()();
+  RealColumn get latitude => real().nullable()();
+  RealColumn get longitude => real().nullable()();
 }
 
 class Prices extends Table {
@@ -48,7 +50,20 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.addColumn(stores, stores.latitude);
+            await m.addColumn(stores, stores.longitude);
+          }
+        },
+      );
 
   // Products DAO methods
   Future<List<Product>> getAllProducts() => select(products).get();

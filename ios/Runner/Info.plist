@@ -45,6 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Cette application utilise votre position pour sélectionner automatiquement le magasin le plus proche.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Cette application utilise votre position pour sélectionner automatiquement le magasin le plus proche.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Cette application utilise la caméra pour scanner les codes-barres des produits et les tickets de caisse.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

@@ -404,8 +404,21 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
   late final GeneratedColumn<String> location = GeneratedColumn<String>(
       'location', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _latitudeMeta =
+      const VerificationMeta('latitude');
   @override
-  List<GeneratedColumn> get $columns => [id, name, location];
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+      'latitude', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _longitudeMeta =
+      const VerificationMeta('longitude');
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+      'longitude', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, location, latitude, longitude];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -429,6 +442,14 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
       context.handle(_locationMeta,
           location.isAcceptableOrUnknown(data['location']!, _locationMeta));
     }
+    if (data.containsKey('latitude')) {
+      context.handle(_latitudeMeta,
+          latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(_longitudeMeta,
+          longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+    }
     return context;
   }
 
@@ -444,6 +465,10 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       location: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}location']),
+      latitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}latitude']),
+      longitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}longitude']),
     );
   }
 
@@ -457,7 +482,14 @@ class Store extends DataClass implements Insertable<Store> {
   final int id;
   final String name;
   final String? location;
-  const Store({required this.id, required this.name, this.location});
+  final double? latitude;
+  final double? longitude;
+  const Store(
+      {required this.id,
+      required this.name,
+      this.location,
+      this.latitude,
+      this.longitude});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -465,6 +497,12 @@ class Store extends DataClass implements Insertable<Store> {
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || location != null) {
       map['location'] = Variable<String>(location);
+    }
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
     }
     return map;
   }
@@ -476,6 +514,12 @@ class Store extends DataClass implements Insertable<Store> {
       location: location == null && nullToAbsent
           ? const Value.absent()
           : Value(location),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
     );
   }
 
@@ -486,6 +530,8 @@ class Store extends DataClass implements Insertable<Store> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       location: serializer.fromJson<String?>(json['location']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
     );
   }
   @override
@@ -495,23 +541,31 @@ class Store extends DataClass implements Insertable<Store> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'location': serializer.toJson<String?>(location),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
     };
   }
 
   Store copyWith(
           {int? id,
           String? name,
-          Value<String?> location = const Value.absent()}) =>
+          Value<String?> location = const Value.absent(),
+          Value<double?> latitude = const Value.absent(),
+          Value<double?> longitude = const Value.absent()}) =>
       Store(
         id: id ?? this.id,
         name: name ?? this.name,
         location: location.present ? location.value : this.location,
+        latitude: latitude.present ? latitude.value : this.latitude,
+        longitude: longitude.present ? longitude.value : this.longitude,
       );
   Store copyWithCompanion(StoresCompanion data) {
     return Store(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       location: data.location.present ? data.location.value : this.location,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
     );
   }
 
@@ -520,54 +574,74 @@ class Store extends DataClass implements Insertable<Store> {
     return (StringBuffer('Store(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('location: $location')
+          ..write('location: $location, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, location);
+  int get hashCode => Object.hash(id, name, location, latitude, longitude);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Store &&
           other.id == this.id &&
           other.name == this.name &&
-          other.location == this.location);
+          other.location == this.location &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude);
 }
 
 class StoresCompanion extends UpdateCompanion<Store> {
   final Value<int> id;
   final Value<String> name;
   final Value<String?> location;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
   const StoresCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.location = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
   });
   StoresCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     this.location = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Store> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? location,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (location != null) 'location': location,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     });
   }
 
   StoresCompanion copyWith(
-      {Value<int>? id, Value<String>? name, Value<String?>? location}) {
+      {Value<int>? id,
+      Value<String>? name,
+      Value<String?>? location,
+      Value<double?>? latitude,
+      Value<double?>? longitude}) {
     return StoresCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       location: location ?? this.location,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 
@@ -583,6 +657,12 @@ class StoresCompanion extends UpdateCompanion<Store> {
     if (location.present) {
       map['location'] = Variable<String>(location.value);
     }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
     return map;
   }
 
@@ -591,7 +671,9 @@ class StoresCompanion extends UpdateCompanion<Store> {
     return (StringBuffer('StoresCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('location: $location')
+          ..write('location: $location, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude')
           ..write(')'))
         .toString();
   }
@@ -1748,11 +1830,15 @@ typedef $$StoresTableCreateCompanionBuilder = StoresCompanion Function({
   Value<int> id,
   required String name,
   Value<String?> location,
+  Value<double?> latitude,
+  Value<double?> longitude,
 });
 typedef $$StoresTableUpdateCompanionBuilder = StoresCompanion Function({
   Value<int> id,
   Value<String> name,
   Value<String?> location,
+  Value<double?> latitude,
+  Value<double?> longitude,
 });
 
 final class $$StoresTableReferences
@@ -1791,6 +1877,12 @@ class $$StoresTableFilterComposer
 
   ColumnFilters<String> get location => $composableBuilder(
       column: $table.location, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnFilters(column));
 
   Expression<bool> pricesRefs(
       Expression<bool> Function($$PricesTableFilterComposer f) f) {
@@ -1831,6 +1923,12 @@ class $$StoresTableOrderingComposer
 
   ColumnOrderings<String> get location => $composableBuilder(
       column: $table.location, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnOrderings(column));
 }
 
 class $$StoresTableAnnotationComposer
@@ -1850,6 +1948,12 @@ class $$StoresTableAnnotationComposer
 
   GeneratedColumn<String> get location =>
       $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   Expression<T> pricesRefs<T extends Object>(
       Expression<T> Function($$PricesTableAnnotationComposer a) f) {
@@ -1899,21 +2003,29 @@ class $$StoresTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String?> location = const Value.absent(),
+            Value<double?> latitude = const Value.absent(),
+            Value<double?> longitude = const Value.absent(),
           }) =>
               StoresCompanion(
             id: id,
             name: name,
             location: location,
+            latitude: latitude,
+            longitude: longitude,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String name,
             Value<String?> location = const Value.absent(),
+            Value<double?> latitude = const Value.absent(),
+            Value<double?> longitude = const Value.absent(),
           }) =>
               StoresCompanion.insert(
             id: id,
             name: name,
             location: location,
+            latitude: latitude,
+            longitude: longitude,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>
