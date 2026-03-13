@@ -17,7 +17,7 @@ class ProductsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comparateur'),
+        title: const Text('JeSuisRadin'),
         centerTitle: false,
         scrolledUnderElevation: 3,
         actions: [
