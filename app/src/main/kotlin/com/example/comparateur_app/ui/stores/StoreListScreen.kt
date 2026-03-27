@@ -42,8 +42,8 @@ fun StoreListScreen(
         floatingActionButton = {
             LargeFloatingActionButton(
                 onClick = { showDialog = true },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = MaterialTheme.shapes.large
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Ajouter un magasin")
@@ -82,7 +82,7 @@ fun StoreListScreen(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text("Nouveau magasin") },
+                title = { Text("Nouveau magasin", fontWeight = FontWeight.Bold) },
                 text = {
                     OutlinedTextField(
                         value = newStoreName,
@@ -101,7 +101,8 @@ fun StoreListScreen(
                                 showDialog = false
                             }
                         },
-                        enabled = newStoreName.isNotBlank()
+                        enabled = newStoreName.isNotBlank(),
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         Text("Ajouter")
                     }
@@ -122,10 +123,9 @@ fun StoreItem(
     store: Store,
     onDelete: () -> Unit
 ) {
-    OutlinedCard(
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.outlinedCardColors(
+        colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
@@ -137,9 +137,10 @@ fun StoreItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = store.name, 
+                text = store.name,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             IconButton(
                 onClick = onDelete,

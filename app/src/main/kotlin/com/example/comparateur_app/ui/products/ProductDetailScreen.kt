@@ -53,7 +53,8 @@ fun ProductDetailScreen(
             FloatingActionButton(
                 onClick = { showAddPriceDialog = true },
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Ajouter un prix")
             }
