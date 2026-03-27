@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.comparateur_app.ui.products.ProductDetailScreen
 import com.example.comparateur_app.ui.products.ProductListScreen
+import com.example.comparateur_app.ui.shoppinglist.ShoppingListDetailScreen
 import com.example.comparateur_app.ui.shoppinglist.ShoppingListScreen
 import com.example.comparateur_app.ui.stores.StoreListScreen
 
@@ -50,13 +51,23 @@ fun MainScreen() {
                 StoreListScreen()
             }
             composable(Screen.ShoppingList.route) {
-                ShoppingListScreen()
+                ShoppingListScreen(
+                    onNavigateToList = { listId ->
+                        navController.navigate(Screen.ShoppingListDetail.createRoute(listId))
+                    }
+                )
             }
             composable(
                 route = Screen.ProductDetail.route,
                 arguments = listOf(navArgument("productId") { type = NavType.IntType })
             ) {
                 ProductDetailScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable(
+                route = Screen.ShoppingListDetail.route,
+                arguments = listOf(navArgument("listId") { type = NavType.IntType })
+            ) {
+                ShoppingListDetailScreen(onNavigateBack = { navController.popBackStack() })
             }
         }
     }

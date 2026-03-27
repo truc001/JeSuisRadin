@@ -18,6 +18,7 @@ import com.example.comparateur_app.data.entity.ShoppingList
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(
+    onNavigateToList: (Int) -> Unit,
     viewModel: ShoppingListViewModel = hiltViewModel()
 ) {
     val shoppingLists by viewModel.allShoppingLists.collectAsState()
@@ -75,7 +76,8 @@ fun ShoppingListScreen(
                 items(shoppingLists) { list ->
                     ShoppingListCard(
                         list = list,
-                        onDelete = { viewModel.deleteShoppingList(list) }
+                        onDelete = { viewModel.deleteShoppingList(list) },
+                        onClick = { onNavigateToList(list.id) }
                     )
                 }
             }
@@ -129,9 +131,11 @@ fun ShoppingListScreen(
 @Composable
 fun ShoppingListCard(
     list: ShoppingList,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onClick: () -> Unit
 ) {
     ElevatedCard(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface

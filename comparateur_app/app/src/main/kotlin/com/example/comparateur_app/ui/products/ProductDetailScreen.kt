@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.comparateur_app.data.model.PriceWithStore
 import com.example.comparateur_app.ui.scan.PriceEntryDialog
+import com.example.comparateur_app.util.normalizePrice
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -133,7 +134,11 @@ fun ProductDetailScreen(
                 }
             } else {
                 itemsIndexed(pricesWithStore) { index, priceWithStore ->
-                    PriceRow(priceWithStore = priceWithStore, isBestPrice = index == 0)
+                    PriceRow(
+                        priceWithStore = priceWithStore,
+                        isBestPrice = index == 0,
+                        productQuantity = product?.quantity
+                    )
                 }
             }
 
@@ -158,8 +163,11 @@ fun ProductDetailScreen(
 }
 
 @Composable
-private fun PriceRow(priceWithStore: PriceWithStore, isBestPrice: Boolean) {
+private fun PriceRow(priceWithStore: PriceWithStore, isBestPrice: Boolean, productQuantity: String?) {
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+    val normalized = remember(priceWithStore.price, productQuantity) {
+        normalizePrice(priceWithStore.price, productQuantity)
+    }
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -206,13 +214,23 @@ private fun PriceRow(priceWithStore: PriceWithStore, isBestPrice: Boolean) {
                     else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Text(
-                "%.2f €".format(priceWithStore.price),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = if (isBestPrice) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurface
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    "%.2f €".format(priceWithStore.price),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (isBestPrice) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface
+                )
+                normalized?.let { (unitPrice, label) ->
+                    Text(
+                        "%.2f €/%s".format(unitPrice, label),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isBestPrice) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

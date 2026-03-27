@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.comparateur_app.data.entity.Product
 import com.example.comparateur_app.data.entity.Store
 import com.example.comparateur_app.util.BarcodeScannerAnalyzer
+import com.example.comparateur_app.util.normalizePrice
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -258,6 +259,13 @@ fun PriceEntryDialog(
     var selectedStore by remember { mutableStateOf<Store?>(null) }
     var expanded by remember { mutableStateOf(false) }
     var showAddStoreDialog by remember { mutableStateOf(false) }
+    val normalizedDisplay = remember(priceStr, product.quantity) {
+        priceStr.toDoubleOrNull()?.let { p ->
+            normalizePrice(p, product.quantity)?.let { (unitPrice, label) ->
+                "= %.2f €/%s".format(unitPrice, label)
+            }
+        }
+    }
 
     if (showAddStoreDialog) {
         AddStoreDialogInScan(
@@ -278,9 +286,9 @@ fun PriceEntryDialog(
                 if (product.brand != null) {
                     Text(product.brand, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 OutlinedTextField(
                     value = priceStr,
                     onValueChange = { priceStr = it },
@@ -289,6 +297,14 @@ fun PriceEntryDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium
                 )
+                normalizedDisplay?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
