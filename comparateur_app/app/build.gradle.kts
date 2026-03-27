@@ -27,6 +27,7 @@ android {
             firebaseAppDistribution {
                 appId = "1:718144283081:android:845f5207cf677823410818"
                 releaseNotes = "Build CI - ${System.getenv("GITHUB_SHA")?.take(7) ?: "local"}"
+                groups = "testeur"
                 serviceCredentialsFile = System.getenv("GOOGLE_APPLICATION_CREDENTIALS") ?: ""
             }
         }
