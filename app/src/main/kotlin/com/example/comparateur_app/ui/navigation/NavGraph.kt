@@ -13,10 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.comparateur_app.ui.products.ProductDetailScreen
 import com.example.comparateur_app.ui.products.ProductListScreen
 import com.example.comparateur_app.ui.shoppinglist.ShoppingListScreen
 import com.example.comparateur_app.ui.stores.StoreListScreen
@@ -39,7 +42,7 @@ fun MainScreen() {
             composable(Screen.Products.route) {
                 ProductListScreen(
                     onNavigateToProductDetails = { productId ->
-                        // Navigate to details if implemented
+                        navController.navigate(Screen.ProductDetail.createRoute(productId))
                     }
                 )
             }
@@ -48,6 +51,12 @@ fun MainScreen() {
             }
             composable(Screen.ShoppingList.route) {
                 ShoppingListScreen()
+            }
+            composable(
+                route = Screen.ProductDetail.route,
+                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+            ) {
+                ProductDetailScreen(onNavigateBack = { navController.popBackStack() })
             }
         }
     }
