@@ -39,7 +39,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/service-account.json
         run: >
-          ./gradlew appDistributionUploadDebug
+          ./gradlew assembleDebug appDistributionUploadDebug
           -PversionCode=${{ github.run_number }}
           -PversionName="1.0.${{ github.run_number }}"
 
