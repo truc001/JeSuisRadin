@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Info
+import com.example.comparateur_app.BuildConfig
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,22 +30,44 @@ fun ProductListScreen(
     
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showVersionDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             Column(modifier = Modifier.padding(bottom = 8.dp)) {
                 CenterAlignedTopAppBar(
-                    title = { 
+                    title = {
                         Text(
-                            "Mes Produits", 
+                            "Mes Produits",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold
-                        ) 
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = { showVersionDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = "Version"
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background
                     )
                 )
+
+                if (showVersionDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showVersionDialog = false },
+                        title = { Text("JeSuisRadin") },
+                        text = { Text("Version ${BuildConfig.VERSION_NAME}\nBuild ${BuildConfig.VERSION_CODE}") },
+                        confirmButton = {
+                            TextButton(onClick = { showVersionDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
                 
                 // M3 SearchBar
                 Box(

@@ -16,8 +16,8 @@ android {
         applicationId = "com.example.comparateur_app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = (project.findProperty("versionCode") as String? ?: "1").toInt()
+        versionName = project.findProperty("versionName") as String? ?: "1.0.0-local"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +48,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
