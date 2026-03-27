@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "718144283081",
+    "project_id": "jesuisradin-db83e",
+    "storage_bucket": "jesuisradin-db83e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:718144283081:android:845f5207cf677823410818",
+        "android_client_info": {
+          "package_name": "com.example.comparateur_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMnS9VWNoF5YvghyJEfAsu4HoyUThIXyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
