@@ -4,6 +4,8 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
+    id("com.google.gms.google-services")
+    id("com.google.firebase.appdistribution")
 }
 
 android {
@@ -21,6 +23,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            firebaseAppDistribution {
+                appId = "1:718144283081:android:845f5207cf677823410818"
+                releaseNotes = "Build CI - ${System.getenv("GITHUB_SHA")?.take(7) ?: "local"}"
+                groups = "testers"
+                serviceCredentialsFile = System.getenv("GOOGLE_APPLICATION_CREDENTIALS") ?: ""
+            }
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

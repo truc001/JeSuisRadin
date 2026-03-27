@@ -29,3 +29,7 @@ gradle-wrapper.jar
 # Kotlin
 .kotlin
 .kotlin-build
+
+# Firebase service account keys (sensitive — never commit)
+*-firebase-adminsdk-*.json
+service-account*.json
