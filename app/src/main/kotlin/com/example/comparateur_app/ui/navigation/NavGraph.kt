@@ -1,5 +1,10 @@
 package com.example.comparateur_app.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
@@ -12,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,12 +31,12 @@ import com.example.comparateur_app.ui.stores.StoreListScreen
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    
+
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController = navController)
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.surface
     ) { paddingValues ->
         NavHost(
             navController = navController,
@@ -57,42 +64,48 @@ fun MainScreen() {
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         NavigationItem(
-            "Produits", 
-            Screen.Products.route, 
-            Icons.Filled.Search, 
+            "Produits",
+            Screen.Products.route,
+            Icons.Filled.Search,
             Icons.Outlined.Search
         ),
         NavigationItem(
-            "Magasins", 
-            Screen.Stores.route, 
-            Icons.Filled.Place, 
+            "Magasins",
+            Screen.Stores.route,
+            Icons.Filled.Place,
             Icons.Outlined.Place
         ),
         NavigationItem(
-            "Courses", 
-            Screen.ShoppingList.route, 
-            Icons.Filled.ShoppingCart, 
+            "Courses",
+            Screen.ShoppingList.route,
+            Icons.Filled.ShoppingCart,
             Icons.Outlined.ShoppingCart
         )
     )
-    
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = NavigationBarDefaults.Elevation
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 0.dp
     ) {
         items.forEach { item ->
             val isSelected = currentRoute == item.route
             NavigationBarItem(
-                icon = { 
+                icon = {
                     Icon(
-                        imageVector = if (isSelected) item.filledIcon else item.outlinedIcon, 
-                        contentDescription = item.title 
-                    ) 
+                        imageVector = if (isSelected) item.filledIcon else item.outlinedIcon,
+                        contentDescription = item.title
+                    )
                 },
-                label = { Text(item.title, style = MaterialTheme.typography.labelMedium) },
+                label = {
+                    Text(
+                        item.title,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                    )
+                },
                 selected = isSelected,
                 onClick = {
                     navController.navigate(item.route) {
@@ -106,9 +119,11 @@ fun BottomNavigationBar(navController: NavHostController) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer
                 )
             )
         }
@@ -116,8 +131,8 @@ fun BottomNavigationBar(navController: NavHostController) {
 }
 
 data class NavigationItem(
-    val title: String, 
-    val route: String, 
+    val title: String,
+    val route: String,
     val filledIcon: androidx.compose.ui.graphics.vector.ImageVector,
     val outlinedIcon: androidx.compose.ui.graphics.vector.ImageVector
 )

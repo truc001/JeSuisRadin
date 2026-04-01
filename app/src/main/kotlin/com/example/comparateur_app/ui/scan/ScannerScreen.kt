@@ -9,11 +9,11 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +37,9 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.comparateur_app.data.entity.Product
 import com.example.comparateur_app.data.entity.Store
+import com.example.comparateur_app.ui.theme.ChipShape
+import com.example.comparateur_app.ui.theme.DialogShape
+import com.example.comparateur_app.ui.theme.FabShape
 import com.example.comparateur_app.util.BarcodeScannerAnalyzer
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -63,7 +66,7 @@ fun ScannerScreen(
                 onBarcodeDetected = { viewModel.onBarcodeDetected(it) }
             )
             ScannerOverlay()
-            
+
             scannedProduct?.let { product ->
                 PriceEntryDialog(
                     product = product,
@@ -92,14 +95,49 @@ fun ScannerScreen(
         }
     } else {
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("La permission caméra est nécessaire pour scanner", style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { cameraPermissionState.launchPermissionRequest() }) {
-                Text("Autoriser la caméra")
+            Surface(
+                shape = FabShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(80.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Outlined.CameraAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                "Permission requise",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "La camera est necessaire pour scanner les codes-barres",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            FilledTonalButton(
+                onClick = { cameraPermissionState.launchPermissionRequest() },
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            ) {
+                Text("Autoriser la camera")
             }
         }
     }
@@ -135,23 +173,30 @@ fun UnifiedAddProductAndPriceDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nouveau produit", fontWeight = FontWeight.Bold) },
+        title = {
+            Text(
+                "Nouveau produit",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = ChipShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        "EAN: $barcode", 
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(8.dp),
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        "EAN: $barcode",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        fontWeight = FontWeight.Medium
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -167,20 +212,23 @@ fun UnifiedAddProductAndPriceDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium
                 )
-                
-                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-                
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+
                 OutlinedTextField(
                     value = priceStr,
                     onValueChange = { priceStr = it },
-                    label = { Text("Prix (€)") },
+                    label = { Text("Prix (\u20AC)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -188,15 +236,17 @@ fun UnifiedAddProductAndPriceDialog(
                         modifier = Modifier.weight(1f)
                     ) {
                         OutlinedTextField(
-                            value = selectedStore?.name ?: "Sélectionner un magasin",
+                            value = selectedStore?.name ?: "Selectionner un magasin",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Magasin") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true).fillMaxWidth(),
+                            modifier = Modifier
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                                .fillMaxWidth(),
                             shape = MaterialTheme.shapes.medium
                         )
-                        
+
                         ExposedDropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
@@ -212,10 +262,11 @@ fun UnifiedAddProductAndPriceDialog(
                             }
                         }
                     }
-                    
+
                     FilledTonalIconButton(
                         onClick = { showAddStoreDialog = true },
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp),
+                        shape = ChipShape
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Ajouter un magasin")
                     }
@@ -223,7 +274,7 @@ fun UnifiedAddProductAndPriceDialog(
             }
         },
         confirmButton = {
-            Button(
+            FilledTonalButton(
                 onClick = {
                     val price = priceStr.toDoubleOrNull()
                     if (name.isNotBlank() && price != null && selectedStore != null) {
@@ -231,7 +282,11 @@ fun UnifiedAddProductAndPriceDialog(
                     }
                 },
                 enabled = name.isNotBlank() && priceStr.toDoubleOrNull() != null && selectedStore != null,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             ) {
                 Text("Tout enregistrer")
             }
@@ -241,7 +296,8 @@ fun UnifiedAddProductAndPriceDialog(
                 Text("Annuler")
             }
         },
-        shape = MaterialTheme.shapes.extraLarge
+        shape = DialogShape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
 
@@ -271,27 +327,50 @@ fun PriceEntryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Ajouter un prix", fontWeight = FontWeight.Bold) },
+        title = {
+            Text(
+                "Ajouter un prix",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
             Column {
-                Text(product.name, style = MaterialTheme.typography.titleMedium)
-                if (product.brand != null) {
-                    Text(product.brand, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = ChipShape,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            product.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (product.brand != null) {
+                            Text(
+                                product.brand,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 OutlinedTextField(
                     value = priceStr,
                     onValueChange = { priceStr = it },
-                    label = { Text("Prix (€)") },
+                    label = { Text("Prix (\u20AC)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -299,15 +378,17 @@ fun PriceEntryDialog(
                         modifier = Modifier.weight(1f)
                     ) {
                         OutlinedTextField(
-                            value = selectedStore?.name ?: "Sélectionner un magasin",
+                            value = selectedStore?.name ?: "Selectionner un magasin",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Magasin") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true).fillMaxWidth(),
+                            modifier = Modifier
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                                .fillMaxWidth(),
                             shape = MaterialTheme.shapes.medium
                         )
-                        
+
                         ExposedDropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
@@ -323,10 +404,11 @@ fun PriceEntryDialog(
                             }
                         }
                     }
-                    
+
                     FilledTonalIconButton(
                         onClick = { showAddStoreDialog = true },
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp),
+                        shape = ChipShape
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Ajouter un magasin")
                     }
@@ -334,7 +416,7 @@ fun PriceEntryDialog(
             }
         },
         confirmButton = {
-            Button(
+            FilledTonalButton(
                 onClick = {
                     val price = priceStr.toDoubleOrNull()
                     if (price != null && selectedStore != null) {
@@ -342,7 +424,11 @@ fun PriceEntryDialog(
                     }
                 },
                 enabled = priceStr.toDoubleOrNull() != null && selectedStore != null,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             ) {
                 Text("Enregistrer")
             }
@@ -352,7 +438,8 @@ fun PriceEntryDialog(
                 Text("Annuler")
             }
         },
-        shape = MaterialTheme.shapes.extraLarge
+        shape = DialogShape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
 
@@ -364,7 +451,13 @@ fun AddStoreDialogInScan(
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nouveau magasin") },
+        title = {
+            Text(
+                "Nouveau magasin",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
             OutlinedTextField(
                 value = name,
@@ -375,7 +468,15 @@ fun AddStoreDialogInScan(
             )
         },
         confirmButton = {
-            Button(onClick = { onConfirm(name) }, enabled = name.isNotBlank(), shape = MaterialTheme.shapes.medium) {
+            FilledTonalButton(
+                onClick = { onConfirm(name) },
+                enabled = name.isNotBlank(),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            ) {
                 Text("Ajouter")
             }
         },
@@ -384,24 +485,25 @@ fun AddStoreDialogInScan(
                 Text("Annuler")
             }
         },
-        shape = MaterialTheme.shapes.extraLarge
+        shape = DialogShape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
 
 @Composable
 fun ScannerOverlay() {
     val primaryColor = MaterialTheme.colorScheme.primary
-    
+
     Canvas(modifier = Modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
         val rectSize = width * 0.7f
         val rectTop = (height - rectSize) / 2f
         val rectLeft = (width - rectSize) / 2f
-        val cornerRadius = 24.dp.toPx()
+        val cornerRadius = 28.dp.toPx()
 
         drawRect(
-            color = Color.Black.copy(alpha = 0.5f),
+            color = Color.Black.copy(alpha = 0.55f),
             size = size
         )
 
@@ -416,7 +518,7 @@ fun ScannerOverlay() {
                 )
             )
         }
-        
+
         drawPath(
             path = rectPath,
             color = Color.Transparent,
@@ -428,7 +530,7 @@ fun ScannerOverlay() {
             topLeft = Offset(rectLeft, rectTop),
             size = Size(rectSize, rectSize),
             cornerRadius = CornerRadius(cornerRadius, cornerRadius),
-            style = Stroke(width = 4.dp.toPx())
+            style = Stroke(width = 3.dp.toPx())
         )
     }
 }
